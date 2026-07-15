@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bottega — Catalogo</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --bg: #F6F2E9;
+    --surface: #FFFFFF;
+    --ink: #1E2A22;
+    --ink-soft: #5C6B60;
+    --forest: #2F6F4E;
+    --forest-dark: #234F38;
+    --mustard: #D6A419;
+    --line: #E7E0CF;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    padding-bottom: 96px;
+  }
+
+  header.top {
+    padding: 20px 18px 14px;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--forest);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  h1.shop-title {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  .shop-sub {
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  main {
+    padding: 16px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card .thumb {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    background: linear-gradient(160deg, #EDE7D6, #F6F2E9);
+  }
+
+  .card .body {
+    padding: 10px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+  }
+
+  .card .name {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--ink);
+  }
+
+  .card .desc {
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    line-height: 1.3;
+    min-height: 28px;
+  }
+
+  .card .row {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .price {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--forest-dark);
+    font-variant-numeric: tabular-nums;
+  }
+
+  button.add-btn {
+    border: none;
+    background: var(--forest);
+    color: #fff;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .12s ease, background .12s ease;
+  }
+  button.add-btn:active { transform: scale(0.9); background: var(--forest-dark); }
+
+  .stepper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #EFF5F0;
+    border-radius: 9px;
+    padding: 2px;
+  }
+  .stepper button {
+    border: none;
+    background: transparent;
+    color: var(--forest-dark);
+    width: 26px;
+    height: 26px;
+    font-size: 16px;
+    font-weight: 800;
+    border-radius: 7px;
+    cursor: pointer;
+  }
+  .stepper button:active { background: #dfeadf; }
+  .stepper .qty {
+    min-width: 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--ink);
+  }
+
+  /* Cart sheet */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 24, 20, 0.42);
+    z-index: 20;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+  }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+
+  .sheet {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 21;
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    max-height: 78vh;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform .25s cubic-bezier(.2,.8,.3,1);
+    box-shadow: 0 -8px 30px rgba(0,0,0,.15);
+  }
+  .sheet.open { transform: translateY(0); }
+
+  .sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--line);
+    border-radius: 3px;
+    margin: 10px auto 4px;
+  }
+
+  .sheet-head {
+    padding: 8px 18px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+  }
+  .sheet-head h2 {
+    font-size: 17px;
+    margin: 0;
+    font-weight: 800;
+  }
+  .sheet-close {
+    border: none;
+    background: var(--bg);
+    color: var(--ink-soft);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  .sheet-list {
+    overflow-y: auto;
+    padding: 6px 18px;
+    flex: 1;
+  }
+
+  .line-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .line-item .emoji { font-size: 24px; width: 32px; text-align: center; }
+  .line-item .info { flex: 1; min-width: 0; }
+  .line-item .info .n { font-size: 13.5px; font-weight: 700; }
+  .line-item .info .p { font-size: 12px; color: var(--ink-soft); margin-top: 1px; }
+
+  .empty-cart {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ink-soft);
+    font-size: 13.5px;
+  }
+  .empty-cart .e { font-size: 34px; margin-bottom: 8px; }
+
+  .sheet-foot {
+    padding: 14px 18px calc(16px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+  }
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+  }
+  .total-row .label { font-size: 13px; color: var(--ink-soft); font-weight: 600; }
+  .total-row .amount { font-size: 21px; font-weight: 800; color: var(--forest-dark); }
+
+  .checkout-btn {
+    width: 100%;
+    border: none;
+    background: var(--forest);
+    color: #fff;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .checkout-btn:disabled { background: #B9C4BB; }
+
+  /* Floating bar (fallback when Telegram MainButton isn't available) */
+  .cart-bar {
+    position: fixed;
+    left: 14px;
+    right: 14px;
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    z-index: 15;
+    background: var(--forest);
+    color: #fff;
+    border-radius: 14px;
+    padding: 13px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 8px 22px rgba(47,111,78,.35);
+    cursor: pointer;
+    transform: translateY(120%);
+    transition: transform .25s cubic-bezier(.2,.8,.3,1);
+  }
+  .cart-bar.visible { transform: translateY(0); }
+  .cart-bar .l { font-size: 13.5px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .cart-bar .badge {
+    background: rgba(255,255,255,.22);
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 12px;
+  }
+  .cart-bar .r { font-size: 15px; font-weight: 800; }
+
+  .toast {
+    position: fixed;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-140%);
+    background: var(--ink);
+    color: #fff;
+    padding: 9px 16px;
+    border-radius: 30px;
+    font-size: 12.5px;
+    font-weight: 600;
+    z-index: 30;
+    transition: transform .25s ease;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="eyebrow">Catalogo</div>
+  <h1 class="shop-title">Bottega Verde</h1>
+  <div class="shop-sub">Prodotti selezionati, spediti in giornata</div>
+</header>
+
+<main>
+  <div class="grid" id="grid"></div>
+</main>
+
+<div class="cart-bar" id="cartBar">
+  <div class="l">🛍️ <span class="badge" id="barCount">0</span> nel carrello</div>
+  <div class="r" id="barTotal">€0,00</div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2>Il tuo carrello</h2>
+    <button class="sheet-close" id="sheetClose">✕</button>
+  </div>
+  <div class="sheet-list" id="sheetList"></div>
+  <div class="sheet-foot">
+    <div class="total-row">
+      <span class="label">Totale</span>
+      <span class="amount" id="sheetTotal">€0,00</span>
+    </div>
+    <button class="checkout-btn" id="checkoutBtn">Conferma ordine</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   CATALOGO — modifica questo array con i tuoi prodotti veri.
+   id: identificatore univoco (stringa)
+   name: nome prodotto
+   desc: breve descrizione (opzionale)
+   price: prezzo in EURO (numero, es. 12.5)
+   emoji: icona/placeholder — sostituiscila con <img> se vuoi foto reali
+   ============================================================ */
+const PRODUCTS = [
+  { id: "p1", name: "Miele di acacia", desc: "Vasetto 250g, produzione artigianale", price: 8.50, emoji: "🍯" },
+  { id: "p2", name: "Olio EVO", desc: "Bottiglia 500ml, spremitura a freddo", price: 12.90, emoji: "🫒" },
+  { id: "p3", name: "Pasta artigianale", desc: "Confezione 500g, grano duro", price: 3.20, emoji: "🍝" },
+  { id: "p4", name: "Marmellata di fichi", desc: "Vasetto 300g", price: 6.00, emoji: "🫙" },
+  { id: "p5", name: "Formaggio stagionato", desc: "Trancio 200g", price: 9.80, emoji: "🧀" },
+  { id: "p6", name: "Vino rosso", desc: "Bottiglia 750ml", price: 14.50, emoji: "🍷" },
+  { id: "p7", name: "Caffè macinato", desc: "Confezione 250g", price: 5.90, emoji: "☕" },
+  { id: "p8", name: "Taralli pugliesi", desc: "Sacchetto 400g", price: 4.30, emoji: "🥨" },
+];
+
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+}
+
+const fmt = (n) => "€" + n.toFixed(2).replace(".", ",");
+
+let cart = {}; // { productId: qty }
+
+const grid = document.getElementById("grid");
+const cartBar = document.getElementById("cartBar");
+const barCount = document.getElementById("barCount");
+const barTotal = document.getElementById("barTotal");
+const overlay = document.getElementById("overlay");
+const sheet = document.getElementById("sheet");
+const sheetList = document.getElementById("sheetList");
+const sheetTotal = document.getElementById("sheetTotal");
+const checkoutBtn = document.getElementById("checkoutBtn");
+const toastEl = document.getElementById("toast");
+
+function renderGrid() {
+  grid.innerHTML = PRODUCTS.map(p => {
+    const qty = cart[p.id] || 0;
+    return `
+      <div class="card" data-id="${p.id}">
+        <div class="thumb">${p.emoji}</div>
+        <div class="body">
+          <div class="name">${p.name}</div>
+          <div class="desc">${p.desc || ""}</div>
+          <div class="row">
+            <span class="price">${fmt(p.price)}</span>
+            ${qty > 0 ? `
+              <div class="stepper">
+                <button class="dec">−</button>
+                <span class="qty">${qty}</span>
+                <button class="inc">+</button>
+              </div>
+            ` : `<button class="add-btn">+</button>`}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function cartCount() {
+  return Object.values(cart).reduce((a, b) => a + b, 0);
+}
+function cartTotal() {
+  return Object.entries(cart).reduce((sum, [id, qty]) => {
+    const p = PRODUCTS.find(x => x.id === id);
+    return sum + (p ? p.price * qty : 0);
+  }, 0);
+}
+
+function updateChrome() {
+  const count = cartCount();
+  const total = cartTotal();
+
+  barCount.textContent = count;
+  barTotal.textContent = fmt(total);
+  cartBar.classList.toggle("visible", count > 0 && !sheet.classList.contains("open"));
+
+  sheetTotal.textContent = fmt(total);
+  checkoutBtn.disabled = count === 0;
+
+  if (tg) {
+    if (count > 0) {
+      tg.MainButton.setText(`Ordina · ${fmt(total)}`);
+      tg.MainButton.show();
+      tg.MainButton.enable();
+    } else {
+      tg.MainButton.hide();
+    }
+  }
+}
+
+function renderSheet() {
+  const entries = Object.entries(cart).filter(([, qty]) => qty > 0);
+  if (entries.length === 0) {
+    sheetList.innerHTML = `
+      <div class="empty-cart">
+        <div class="e">🧺</div>
+        Il carrello è vuoto.<br>Aggiungi qualche prodotto dal catalogo.
+      </div>`;
+    return;
+  }
+  sheetList.innerHTML = entries.map(([id, qty]) => {
+    const p = PRODUCTS.find(x => x.id === id);
+    return `
+      <div class="line-item" data-id="${id}">
+        <div class="emoji">${p.emoji}</div>
+        <div class="info">
+          <div class="n">${p.name}</div>
+          <div class="p">${fmt(p.price)} × ${qty} = ${fmt(p.price * qty)}</div>
+        </div>
+        <div class="stepper">
+          <button class="dec">−</button>
+          <span class="qty">${qty}</span>
+          <button class="inc">+</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function setQty(id, qty) {
+  if (qty <= 0) {
+    delete cart[id];
+  } else {
+    cart[id] = qty;
+  }
+  renderGrid();
+  renderSheet();
+  updateChrome();
+}
+
+function addToCart(id) {
+  setQty(id, (cart[id] || 0) + 1);
+  if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred("light");
+  showToast("Aggiunto al carrello");
+}
+
+function showToast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toastEl.classList.remove("show"), 1400);
+}
+
+function openSheet() {
+  renderSheet();
+  overlay.classList.add("open");
+  sheet.classList.add("open");
+  cartBar.classList.remove("visible");
+}
+function closeSheet() {
+  overlay.classList.remove("open");
+  sheet.classList.remove("open");
+  updateChrome();
+}
+
+// Delega click sulla griglia prodotti
+grid.addEventListener("click", (e) => {
+  const card = e.target.closest(".card");
+  if (!card) return;
+  const id = card.dataset.id;
+  if (e.target.classList.contains("add-btn")) addToCart(id);
+  if (e.target.classList.contains("inc")) setQty(id, (cart[id] || 0) + 1);
+  if (e.target.classList.contains("dec")) setQty(id, (cart[id] || 0) - 1);
+});
+
+// Delega click sulla lista del carrello
+sheetList.addEventListener("click", (e) => {
+  const item = e.target.closest(".line-item");
+  if (!item) return;
+  const id = item.dataset.id;
+  if (e.target.classList.contains("inc")) setQty(id, (cart[id] || 0) + 1);
+  if (e.target.classList.contains("dec")) setQty(id, (cart[id] || 0) - 1);
+});
+
+cartBar.addEventListener("click", openSheet);
+document.getElementById("sheetClose").addEventListener("click", closeSheet);
+overlay.addEventListener("click", closeSheet);
+
+function submitOrder() {
+  if (cartCount() === 0) return;
+  const order = {
+    items: Object.entries(cart).map(([id, qty]) => {
+      const p = PRODUCTS.find(x => x.id === id);
+      return { id, name: p.name, price: p.price, qty };
+    }),
+    total: Number(cartTotal().toFixed(2)),
+  };
+
+  if (tg) {
+    // Invia i dati dell'ordine al bot collegato (gestiscilo lato server con web_app_data)
+    tg.sendData(JSON.stringify(order));
+  } else {
+    // Fallback per test fuori da Telegram
+    console.log("Ordine:", order);
+    alert("Ordine inviato (modalità test, fuori da Telegram):\n" + JSON.stringify(order, null, 2));
+  }
+}
+
+checkoutBtn.addEventListener("click", submitOrder);
+if (tg) tg.MainButton.onClick(submitOrder);
+
+// Tema: se in Telegram, adatta i colori base a quelli del client
+function applyTelegramTheme() {
+  if (!tg) return;
+  const bg = tg.themeParams.bg_color;
+  const text = tg.themeParams.text_color;
+  if (bg) document.documentElement.style.setProperty("--bg", bg);
+  if (text) document.documentElement.style.setProperty("--ink", text);
+}
+applyTelegramTheme();
+if (tg) tg.onEvent("themeChanged", applyTelegramTheme);
+
+renderGrid();
+updateChrome();
+</script>
+</body>
+</html>
