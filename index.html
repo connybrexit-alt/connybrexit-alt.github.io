@@ -3,18 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Bottega — Catalogo</title>
+<title>TrapBoys — Catalogo</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   :root{
-    --bg: #F6F2E9;
-    --surface: #FFFFFF;
-    --ink: #1E2A22;
-    --ink-soft: #5C6B60;
-    --forest: #2F6F4E;
-    --forest-dark: #234F38;
-    --mustard: #D6A419;
-    --line: #E7E0CF;
+    --bg: #0A0A0B;
+    --surface: #17181A;
+    --surface-2: #202124;
+    --ink: #F5F5F2;
+    --ink-soft: #B7BBB4;
+    --forest: #3FAE72;
+    --forest-dark: #2E8158;
+    --forest-soft: rgba(63, 174, 114, 0.16);
+    --mustard: #F0B429;
+    --line: #2B2C2F;
     --radius: 16px;
   }
 
@@ -90,14 +92,22 @@
     align-items: center;
     justify-content: center;
     font-size: 40px;
-    background: linear-gradient(160deg, #EDE7D6, #F6F2E9);
+    background: linear-gradient(160deg, #1E1F22, #131315);
+    overflow: hidden;
+  }
+
+  .card .thumb video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   .card .body {
     padding: 10px 12px 12px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 7px;
     flex: 1;
   }
 
@@ -115,6 +125,33 @@
     min-height: 28px;
   }
 
+  /* Selettore varianti (4 opzioni di quantità/formato, ognuna con prezzo diverso) */
+  .variant-pills {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+  }
+  .variant-pill {
+    border: 1.5px solid var(--line);
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 5px 4px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    text-align: center;
+    cursor: pointer;
+    line-height: 1.25;
+    transition: border-color .12s ease, color .12s ease, background .12s ease;
+  }
+  .variant-pill .l { display: block; }
+  .variant-pill .p { display: block; font-size: 10px; font-weight: 800; margin-top: 1px; }
+  .variant-pill.selected {
+    border-color: var(--forest);
+    background: var(--forest-soft);
+    color: var(--forest);
+  }
+
   .card .row {
     margin-top: auto;
     display: flex;
@@ -126,7 +163,7 @@
   .price {
     font-size: 15px;
     font-weight: 800;
-    color: var(--forest-dark);
+    color: var(--forest);
     font-variant-numeric: tabular-nums;
   }
 
@@ -145,21 +182,39 @@
     align-items: center;
     justify-content: center;
     transition: transform .12s ease, background .12s ease;
+    flex-shrink: 0;
   }
-  button.add-btn:active { transform: scale(0.9); background: var(--forest-dark); }
+  button.add-btn:active { transform: scale(0.9); background: var(--forest); }
+
+  button.contact-btn {
+    border: none;
+    background: var(--mustard);
+    color: #1A1A1A;
+    padding: 6px 10px;
+    border-radius: 9px;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.2;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: transform .12s ease, opacity .12s ease;
+  }
+  button.contact-btn:active { transform: scale(0.94); opacity: 0.85; }
 
   .stepper {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: #EFF5F0;
+    background: var(--surface-2);
     border-radius: 9px;
     padding: 2px;
+    flex-shrink: 0;
   }
   .stepper button {
     border: none;
     background: transparent;
-    color: var(--forest-dark);
+    color: var(--forest);
     width: 26px;
     height: 26px;
     font-size: 16px;
@@ -167,7 +222,7 @@
     border-radius: 7px;
     cursor: pointer;
   }
-  .stepper button:active { background: #dfeadf; }
+  .stepper button:active { background: rgba(255,255,255,0.08); }
   .stepper .qty {
     min-width: 16px;
     text-align: center;
@@ -247,9 +302,10 @@
     padding: 10px 0;
     border-bottom: 1px solid var(--line);
   }
-  .line-item .emoji { font-size: 24px; width: 32px; text-align: center; }
+  .line-item .emoji { font-size: 24px; width: 32px; text-align: center; flex-shrink: 0; }
   .line-item .info { flex: 1; min-width: 0; }
   .line-item .info .n { font-size: 13.5px; font-weight: 700; }
+  .line-item .info .v { font-size: 11px; color: var(--forest); font-weight: 700; margin-top: 1px; }
   .line-item .info .p { font-size: 12px; color: var(--ink-soft); margin-top: 1px; }
 
   .empty-cart {
@@ -271,7 +327,7 @@
     margin-bottom: 12px;
   }
   .total-row .label { font-size: 13px; color: var(--ink-soft); font-weight: 600; }
-  .total-row .amount { font-size: 21px; font-weight: 800; color: var(--forest-dark); }
+  .total-row .amount { font-size: 21px; font-weight: 800; color: var(--forest); }
 
   .checkout-btn {
     width: 100%;
@@ -284,7 +340,7 @@
     font-weight: 800;
     cursor: pointer;
   }
-  .checkout-btn:disabled { background: #B9C4BB; }
+  .checkout-btn:disabled { background: var(--surface-2); color: var(--ink-soft); }
 
   /* Floating bar (fallback when Telegram MainButton isn't available) */
   .cart-bar {
@@ -320,8 +376,9 @@
     top: 14px;
     left: 50%;
     transform: translateX(-50%) translateY(-140%);
-    background: var(--ink);
-    color: #fff;
+    background: var(--surface-2);
+    color: var(--ink);
+    border: 1px solid var(--line);
     padding: 9px 16px;
     border-radius: 30px;
     font-size: 12.5px;
@@ -337,8 +394,8 @@
 
 <header class="top">
   <div class="eyebrow">Catalogo</div>
-  <h1 class="shop-title">Bottega Verde</h1>
-  <div class="shop-sub">Prodotti selezionati, spediti in giornata</div>
+  <h1 class="shop-title">TRAP BOYS LOMBARDIA</h1>
+  <div class="shop-sub">Delivery in tutta la Lombardia</div>
 </header>
 
 <main>
@@ -371,33 +428,112 @@
 
 <script>
 /* ============================================================
+   QUANTITÀ — uguali per TUTTI i prodotti, in quest'ordine fisso.
+   Se vuoi cambiare le taglie disponibili, modifica solo questo
+   array: si aggiorna automaticamente ovunque nel catalogo.
+   ============================================================ */
+const QUANTITIES = ["20g", "50g", "100g", "500g", "1kg", "BULK"];
+
+/* ============================================================
    CATALOGO — modifica questo array con i tuoi prodotti veri.
-   id: identificatore univoco (stringa)
+   id: identificatore univoco del prodotto (stringa)
    name: nome prodotto
    desc: breve descrizione (opzionale)
-   price: prezzo in EURO (numero, es. 12.5)
-   emoji: icona/placeholder — sostituiscila con <img> se vuoi foto reali
+   emoji: icona/placeholder, usata se il prodotto NON ha un video
+   video: (opzionale) percorso del file video, es. "video/miele.mp4" —
+          se presente, sostituisce l'emoji con un video in autoplay/loop/muto.
+          Carica i file .mp4 in una cartella "video" nello stesso repo GitHub
+          accanto a index.html, e richiamali con un percorso relativo.
+          Consiglio: clip da 5-10 secondi, sotto i 5-10MB, senza audio.
+   prices: ESATTAMENTE 6 valori, nello STESSO ORDINE di QUANTITIES
+           (25g, 50g, 100g, 500g, 1kg, BULK). Ogni valore è un prezzo in
+           EURO (numero, es. 45.00), TRANNE l'ultimo (BULK) che va lasciato
+           come stringa "DM" — per quella quantità, invece del prezzo,
+           compare un pulsante "Contattaci" che apre una chat privata.
+           Es: [3.50, 6.00, 10.50, 45.00, 82.00, "DM"]
    ============================================================ */
+
+// Username Telegram (senza @) da contattare per gli ordini BULK.
+const CONTACT_USERNAME = "TRAP26BOYS";
+
+// Username Telegram (senza @) che riceve il riepilogo ordine al checkout.
+const ORDER_RECIPIENT_USERNAME = "TRAP26BOYS";
+
 const PRODUCTS = [
-  { id: "p1", name: "Miele di acacia", desc: "Vasetto 250g, produzione artigianale", price: 8.50, emoji: "🍯" },
-  { id: "p2", name: "Olio EVO", desc: "Bottiglia 500ml, spremitura a freddo", price: 12.90, emoji: "🫒" },
-  { id: "p3", name: "Pasta artigianale", desc: "Confezione 500g, grano duro", price: 3.20, emoji: "🍝" },
-  { id: "p4", name: "Marmellata di fichi", desc: "Vasetto 300g", price: 6.00, emoji: "🫙" },
-  { id: "p5", name: "Formaggio stagionato", desc: "Trancio 200g", price: 9.80, emoji: "🧀" },
-  { id: "p6", name: "Vino rosso", desc: "Bottiglia 750ml", price: 14.50, emoji: "🍷" },
-  { id: "p7", name: "Caffè macinato", desc: "Confezione 250g", price: 5.90, emoji: "☕" },
-  { id: "p8", name: "Taralli pugliesi", desc: "Sacchetto 400g", price: 4.30, emoji: "🥨" },
+  {
+    id: "p1", name: "•Dry Premium - MFL", desc: "Best Dry in circolazione, top Price", emoji: "🍫",
+    video: "video/miele.mp4", // esempio: rimuovi questa riga se non hai ancora caricato il file
+    prices: [170, 250, 400, 1550, 2850, "DM"],
+  },
+  {
+    id: "p2", name: "•Frozen - Hamdulla Farm ", desc: "Frozen 90u, vari Strain disponibili", emoji: "🍫",
+    prices: [220, 400, 700, 3100, "DM", "DM"],
+  },
+  {
+    id: "p3", name: "•Plasma Static - Hamdulla Farm", desc: "Maroccan Plasma Static, top terps", emoji: "🍫",
+    prices: [320, 650, 1200, "DM", "DM", "DM"],
+  },
+  {
+    id: "p4", name: "•Piattella Skittlez - NOFARM", desc: "Piattella-like 73u", emoji: "🍫",
+    prices: [200, 400, 750, "DM",  "DM", "DM"],
+  },
+  {
+    id: "p5", name: "•ICE-O-LATOR - NOFARM", desc: "Prodotto esclusivo, strain in DM", emoji: "🍫",
+    prices: [470, 1000, "DM", "DM", "DM", "DM"],
+  },
+  {
+    id: "p6", name: "•Cali Spain", desc: "Weed Spagnola, vari Strain disponibili", emoji: "🍃",
+    prices: [220, 350, 650, 2600, "DM", "DM"],
+  },
 ];
+
+// Costruisce le varianti (quantità + prezzo) di ogni prodotto a partire da QUANTITIES + prices
+PRODUCTS.forEach(p => {
+  p.variants = QUANTITIES.map((label, i) => ({ id: label, label, price: p.prices[i] }));
+});
 
 const tg = window.Telegram?.WebApp;
 if (tg) {
   tg.ready();
   tg.expand();
+  // Forza il nero anche sull'header nativo e sullo sfondo di Telegram, per coerenza col tema scuro fisso
+  tg.setHeaderColor?.("#0A0A0B");
+  tg.setBackgroundColor?.("#0A0A0B");
 }
 
 const fmt = (n) => "€" + n.toFixed(2).replace(".", ",");
 
-let cart = {}; // { productId: qty }
+// Formatta un valore di prezzo, gestendo il caso speciale "DM" (contattaci)
+const isDM = (price) => price === "DM";
+const fmtPrice = (price) => isDM(price) ? "📩 DM" : fmt(price);
+
+// Apre una chat privata con il venditore per gli ordini BULK
+function contactSeller(productName) {
+  const text = encodeURIComponent(`Ciao! Sono interessato all'acquisto BULK di: ${productName}`);
+  const url = `https://t.me/${CONTACT_USERNAME}?text=${text}`;
+  if (tg?.openTelegramLink) {
+    tg.openTelegramLink(url);
+  } else {
+    window.open(url, "_blank");
+  }
+}
+
+// Ricava una variante a partire da productId + variantId
+function getVariant(productId, variantId) {
+  const p = PRODUCTS.find(x => x.id === productId);
+  if (!p) return null;
+  const v = p.variants.find(x => x.id === variantId);
+  return v ? { product: p, variant: v } : null;
+}
+
+// Chiave univoca di riga carrello: prodotto + variante scelta
+const lineKey = (productId, variantId) => `${productId}::${variantId}`;
+
+let cart = {};            // { "productId::variantId": qty }
+let selectedVariant = {}; // { productId: variantId } — variante attualmente scelta in ogni card, non ancora aggiunta
+
+// Inizializza la variante selezionata di default (la prima) per ogni prodotto
+PRODUCTS.forEach(p => { selectedVariant[p.id] = p.variants[0].id; });
 
 const grid = document.getElementById("grid");
 const cartBar = document.getElementById("cartBar");
@@ -412,22 +548,42 @@ const toastEl = document.getElementById("toast");
 
 function renderGrid() {
   grid.innerHTML = PRODUCTS.map(p => {
-    const qty = cart[p.id] || 0;
+    const vId = selectedVariant[p.id];
+    const v = p.variants.find(x => x.id === vId);
+    const key = lineKey(p.id, vId);
+    const qty = cart[key] || 0;
+
+    const pills = p.variants.map(vv => `
+      <div class="variant-pill ${vv.id === vId ? "selected" : ""}" data-vid="${vv.id}">
+        <span class="l">${vv.label}</span>
+        <span class="p">${fmtPrice(vv.price)}</span>
+      </div>
+    `).join("");
+
+    const thumbContent = p.video
+      ? `<video src="${p.video}" autoplay muted loop playsinline></video>`
+      : p.emoji;
+
+    const actionArea = isDM(v.price)
+      ? `<button class="contact-btn">📩 Contattaci</button>`
+      : (qty > 0 ? `
+          <div class="stepper">
+            <button class="dec">−</button>
+            <span class="qty">${qty}</span>
+            <button class="inc">+</button>
+          </div>
+        ` : `<button class="add-btn">+</button>`);
+
     return `
       <div class="card" data-id="${p.id}">
-        <div class="thumb">${p.emoji}</div>
+        <div class="thumb">${thumbContent}</div>
         <div class="body">
           <div class="name">${p.name}</div>
           <div class="desc">${p.desc || ""}</div>
+          <div class="variant-pills">${pills}</div>
           <div class="row">
-            <span class="price">${fmt(p.price)}</span>
-            ${qty > 0 ? `
-              <div class="stepper">
-                <button class="dec">−</button>
-                <span class="qty">${qty}</span>
-                <button class="inc">+</button>
-              </div>
-            ` : `<button class="add-btn">+</button>`}
+            <span class="price">${fmtPrice(v.price)}</span>
+            ${actionArea}
           </div>
         </div>
       </div>
@@ -439,9 +595,11 @@ function cartCount() {
   return Object.values(cart).reduce((a, b) => a + b, 0);
 }
 function cartTotal() {
-  return Object.entries(cart).reduce((sum, [id, qty]) => {
-    const p = PRODUCTS.find(x => x.id === id);
-    return sum + (p ? p.price * qty : 0);
+  return Object.entries(cart).reduce((sum, [key, qty]) => {
+    const [productId, variantId] = key.split("::");
+    const found = getVariant(productId, variantId);
+    if (!found || isDM(found.variant.price)) return sum;
+    return sum + found.variant.price * qty;
   }, 0);
 }
 
@@ -477,14 +635,18 @@ function renderSheet() {
       </div>`;
     return;
   }
-  sheetList.innerHTML = entries.map(([id, qty]) => {
-    const p = PRODUCTS.find(x => x.id === id);
+  sheetList.innerHTML = entries.map(([key, qty]) => {
+    const [productId, variantId] = key.split("::");
+    const found = getVariant(productId, variantId);
+    if (!found) return "";
+    const { product: p, variant: v } = found;
     return `
-      <div class="line-item" data-id="${id}">
+      <div class="line-item" data-key="${key}">
         <div class="emoji">${p.emoji}</div>
         <div class="info">
           <div class="n">${p.name}</div>
-          <div class="p">${fmt(p.price)} × ${qty} = ${fmt(p.price * qty)}</div>
+          <div class="v">${v.label}</div>
+          <div class="p">${fmt(v.price)} × ${qty} = ${fmt(v.price * qty)}</div>
         </div>
         <div class="stepper">
           <button class="dec">−</button>
@@ -496,19 +658,27 @@ function renderSheet() {
   }).join("");
 }
 
-function setQty(id, qty) {
+function setQty(productId, variantId, qty) {
+  const key = lineKey(productId, variantId);
   if (qty <= 0) {
-    delete cart[id];
+    delete cart[key];
   } else {
-    cart[id] = qty;
+    cart[key] = qty;
   }
   renderGrid();
   renderSheet();
   updateChrome();
 }
 
-function addToCart(id) {
-  setQty(id, (cart[id] || 0) + 1);
+function addToCart(productId) {
+  const variantId = selectedVariant[productId];
+  const found = getVariant(productId, variantId);
+  if (found && isDM(found.variant.price)) {
+    contactSeller(`${found.product.name} (${found.variant.label})`);
+    return;
+  }
+  const key = lineKey(productId, variantId);
+  setQty(productId, variantId, (cart[key] || 0) + 1);
   if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred("light");
   showToast("Aggiunto al carrello");
 }
@@ -536,55 +706,80 @@ function closeSheet() {
 grid.addEventListener("click", (e) => {
   const card = e.target.closest(".card");
   if (!card) return;
-  const id = card.dataset.id;
-  if (e.target.classList.contains("add-btn")) addToCart(id);
-  if (e.target.classList.contains("inc")) setQty(id, (cart[id] || 0) + 1);
-  if (e.target.classList.contains("dec")) setQty(id, (cart[id] || 0) - 1);
+  const productId = card.dataset.id;
+
+  const pill = e.target.closest(".variant-pill");
+  if (pill) {
+    selectedVariant[productId] = pill.dataset.vid;
+    renderGrid();
+    return;
+  }
+
+  const variantId = selectedVariant[productId];
+  if (e.target.classList.contains("add-btn")) addToCart(productId);
+  if (e.target.classList.contains("contact-btn")) addToCart(productId); // addToCart reindirizza al contatto se la variante è DM
+  if (e.target.classList.contains("inc")) setQty(productId, variantId, (cart[lineKey(productId, variantId)] || 0) + 1);
+  if (e.target.classList.contains("dec")) setQty(productId, variantId, (cart[lineKey(productId, variantId)] || 0) - 1);
 });
 
 // Delega click sulla lista del carrello
 sheetList.addEventListener("click", (e) => {
   const item = e.target.closest(".line-item");
   if (!item) return;
-  const id = item.dataset.id;
-  if (e.target.classList.contains("inc")) setQty(id, (cart[id] || 0) + 1);
-  if (e.target.classList.contains("dec")) setQty(id, (cart[id] || 0) - 1);
+  const [productId, variantId] = item.dataset.key.split("::");
+  const key = item.dataset.key;
+  if (e.target.classList.contains("inc")) setQty(productId, variantId, (cart[key] || 0) + 1);
+  if (e.target.classList.contains("dec")) setQty(productId, variantId, (cart[key] || 0) - 1);
 });
 
 cartBar.addEventListener("click", openSheet);
 document.getElementById("sheetClose").addEventListener("click", closeSheet);
 overlay.addEventListener("click", closeSheet);
 
+function buildOrderText() {
+  const lines = Object.entries(cart).map(([key, qty]) => {
+    const [productId, variantId] = key.split("::");
+    const { product: p, variant: v } = getVariant(productId, variantId);
+    return `• ${qty}x ${p.name} (${v.label}) — ${fmt(v.price * qty)}`;
+  });
+  const total = fmt(cartTotal());
+  return `🛍️ Nuovo ordine da TrapBoys BOT\n\n${lines.join("\n")}\n\nTotale: ${total}`;
+}
+
 function submitOrder() {
   if (cartCount() === 0) return;
-  const order = {
-    items: Object.entries(cart).map(([id, qty]) => {
-      const p = PRODUCTS.find(x => x.id === id);
-      return { id, name: p.name, price: p.price, qty };
-    }),
-    total: Number(cartTotal().toFixed(2)),
-  };
 
-  if (tg) {
-    // Invia i dati dell'ordine al bot collegato (gestiscilo lato server con web_app_data)
-    tg.sendData(JSON.stringify(order));
+  const text = buildOrderText();
+  const url = `https://t.me/${ORDER_RECIPIENT_USERNAME}?text=${encodeURIComponent(text)}`;
+
+  if (tg?.openTelegramLink) {
+    tg.openTelegramLink(url);
   } else {
-    // Fallback per test fuori da Telegram
-    console.log("Ordine:", order);
-    alert("Ordine inviato (modalità test, fuori da Telegram):\n" + JSON.stringify(order, null, 2));
+    window.open(url, "_blank");
   }
+
+  // Svuota il carrello dopo aver aperto la chat con il riepilogo
+  cart = {};
+  renderGrid();
+  renderSheet();
+  updateChrome();
+  closeSheet();
+  showToast("Apri la chat per inviare l'ordine");
 }
 
 checkoutBtn.addEventListener("click", submitOrder);
 if (tg) tg.MainButton.onClick(submitOrder);
 
 // Tema: se in Telegram, adatta i colori base a quelli del client
+// Nota: qui NON adattiamo più i colori al tema chiaro/scuro di Telegram,
+// per mantenere sempre lo sfondo nero fisso richiesto per questa mini app.
+// Se in futuro vuoi riattivare l'adattamento automatico, decommenta sotto.
 function applyTelegramTheme() {
-  if (!tg) return;
-  const bg = tg.themeParams.bg_color;
-  const text = tg.themeParams.text_color;
-  if (bg) document.documentElement.style.setProperty("--bg", bg);
-  if (text) document.documentElement.style.setProperty("--ink", text);
+  // if (!tg) return;
+  // const bg = tg.themeParams.bg_color;
+  // const text = tg.themeParams.text_color;
+  // if (bg) document.documentElement.style.setProperty("--bg", bg);
+  // if (text) document.documentElement.style.setProperty("--ink", text);
 }
 applyTelegramTheme();
 if (tg) tg.onEvent("themeChanged", applyTelegramTheme);
