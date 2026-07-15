@@ -125,31 +125,41 @@
     min-height: 28px;
   }
 
-  /* Selettore varianti (4 opzioni di quantità/formato, ognuna con prezzo diverso) */
+  /* Selettore varianti: lista verticale a piena larghezza — etichetta a
+     sinistra, prezzo a destra. Nessuna griglia stretta = niente testo
+     compresso su schermi piccoli. */
   .variant-pills {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
   .variant-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
     border: 1.5px solid var(--line);
     background: var(--bg);
-    border-radius: 8px;
-    padding: 5px 4px;
-    font-size: 10.5px;
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 13px;
     font-weight: 700;
     color: var(--ink-soft);
-    text-align: center;
     cursor: pointer;
-    line-height: 1.25;
+    line-height: 1.3;
     transition: border-color .12s ease, color .12s ease, background .12s ease;
   }
-  .variant-pill .l { display: block; }
-  .variant-pill .p { display: block; font-size: 10px; font-weight: 800; margin-top: 1px; }
+  .variant-pill .l { white-space: nowrap; }
+  .variant-pill .p { font-size: 13px; font-weight: 800; white-space: nowrap; }
   .variant-pill.selected {
     border-color: var(--forest);
     background: var(--forest-soft);
     color: var(--forest);
+  }
+  .variant-pill.dm.selected {
+    border-color: var(--mustard);
+    background: rgba(240, 180, 41, 0.14);
+    color: var(--mustard);
   }
 
   .card .row {
@@ -395,7 +405,7 @@
 <header class="top">
   <div class="eyebrow">Catalogo</div>
   <h1 class="shop-title">TRAP BOYS LOMBARDIA</h1>
-  <div class="shop-sub">Delivery in tutta la Lombardia</div>
+  <div class="shop-sub">Prodotti selezionati, Delivery in tutta la Lombardia</div>
 </header>
 
 <main>
@@ -445,16 +455,16 @@ const QUANTITIES = ["20g", "50g", "100g", "500g", "1kg"];
           Carica i file .mp4 in una cartella "video" nello stesso repo GitHub
           accanto a index.html, e richiamali con un percorso relativo.
           Consiglio: clip da 5-10 secondi, sotto i 5-10MB, senza audio.
-   prices: ESATTAMENTE 6 valori, nello STESSO ORDINE di QUANTITIES
-           (25g, 50g, 100g, 500g, 1kg, BULK). Ogni valore è un prezzo in
-           EURO (numero, es. 45.00), TRANNE l'ultimo (BULK) che va lasciato
-           come stringa "DM" — per quella quantità, invece del prezzo,
-           compare un pulsante "Contattaci" che apre una chat privata.
-           Es: [3.50, 6.00, 10.50, 45.00, 82.00, "DM"]
+   prices: ESATTAMENTE 5 valori, nello STESSO ORDINE di QUANTITIES
+           (20g, 50g, 100g, 500g, 1kg). I primi 4 sono prezzi in EURO
+           (numero, es. 45.00). L'ultimo (1kg) va lasciato come stringa
+           "DM" — per quella quantità, invece del prezzo, compare un
+           pulsante "Contattaci" che apre una chat privata.
+           Es: [3.50, 6.00, 10.50, 45.00, "DM"]
    ============================================================ */
 
 // Username Telegram (senza @) da contattare per gli ordini BULK.
-const CONTACT_USERNAME = "TRAP26BOYS";
+const CONTACT_USERNAME = "tuo_username";
 
 // Username Telegram (senza @) che riceve il riepilogo ordine al checkout.
 const ORDER_RECIPIENT_USERNAME = "TRAP26BOYS";
@@ -462,28 +472,32 @@ const ORDER_RECIPIENT_USERNAME = "TRAP26BOYS";
 const PRODUCTS = [
   {
     id: "p1", name: "•Dry Premium - MFL", desc: "Best Dry in circolazione, top Price", emoji: "🍫",
-    video: "video/miele.mp4", // esempio: rimuovi questa riga se non hai ancora caricato il file
-    prices: [170, 250, 400, 1550, 2850, "DM"],
+    prices: [170, 250, 400, 1550, 2850],
   },
   {
     id: "p2", name: "•Frozen - Hamdulla Farm ", desc: "Frozen 90u, vari Strain disponibili", emoji: "🍫",
-    prices: [220, 400, 700, 3100, "DM", "DM"],
+	video: "video/hamd.mp4", // esempio: rimuovi questa riga se non hai ancora caricato il file
+    prices: [220, 400, 700, 3100, "DM"],
   },
   {
     id: "p3", name: "•Plasma Static - Hamdulla Farm", desc: "Maroccan Plasma Static, top terps", emoji: "🍫",
-    prices: [320, 650, 1200, "DM", "DM", "DM"],
+    prices: [320, 650, 1200, "DM", "DM"],
   },
   {
     id: "p4", name: "•Piattella Skittlez - NOFARM", desc: "Piattella-like 73u", emoji: "🍫",
-    prices: [200, 400, 750, "DM",  "DM", "DM"],
+    prices: [200, 400, 750, "DM",  "DM"],
   },
   {
     id: "p5", name: "•ICE-O-LATOR - NOFARM", desc: "Prodotto esclusivo, strain in DM", emoji: "🍫",
-    prices: [470, 1000, "DM", "DM", "DM", "DM"],
+    prices: [470, 1000, "DM", "DM", "DM"],
   },
   {
     id: "p6", name: "•Cali Spain", desc: "Weed Spagnola, vari Strain disponibili", emoji: "🍃",
-    prices: [220, 350, 650, 2600, "DM", "DM"],
+    prices: [220, 350, 650, 2600, "DM"],
+  },
+  {
+    id: "p7", name: "•Frozen - Mountain Brothers Farm", desc: "Frozen placche da 50g, molti strain", emoji: "🍃",
+    prices: [200, 300, 600, 2400, "DM"],
   },
 ];
 
@@ -554,7 +568,7 @@ function renderGrid() {
     const qty = cart[key] || 0;
 
     const pills = p.variants.map(vv => `
-      <div class="variant-pill ${vv.id === vId ? "selected" : ""}" data-vid="${vv.id}">
+      <div class="variant-pill ${isDM(vv.price) ? "dm" : ""} ${vv.id === vId ? "selected" : ""}" data-vid="${vv.id}">
         <span class="l">${vv.label}</span>
         <span class="p">${fmtPrice(vv.price)}</span>
       </div>
@@ -743,7 +757,7 @@ function buildOrderText() {
     return `• ${qty}x ${p.name} (${v.label}) — ${fmt(v.price * qty)}`;
   });
   const total = fmt(cartTotal());
-  return `🛍️ Nuovo ordine da TrapBoys BOT\n\n${lines.join("\n")}\n\nTotale: ${total}`;
+  return `🛍️ Nuovo ordine da Bottega Verde\n\n${lines.join("\n")}\n\nTotale: ${total}`;
 }
 
 function submitOrder() {
