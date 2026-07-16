@@ -94,6 +94,7 @@
     font-size: 40px;
     background: linear-gradient(160deg, #1E1F22, #131315);
     overflow: hidden;
+    position: relative;
   }
 
   .card .thumb video {
@@ -101,6 +102,33 @@
     height: 100%;
     object-fit: cover;
     display: block;
+  }
+
+  .card.sold-out .thumb { opacity: 0.35; filter: grayscale(1); }
+
+  .sold-out-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: #C0392B;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    padding: 4px 8px;
+    border-radius: 6px;
+    z-index: 2;
+  }
+
+  .sold-out-note {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    background: var(--surface-2);
+    border-radius: 8px;
+    padding: 8px;
+    margin-top: auto;
   }
 
   .card .body {
@@ -404,8 +432,8 @@
 
 <header class="top">
   <div class="eyebrow">Catalogo</div>
-  <h1 class="shop-title">TRAP BOYS LOMBARDIA</h1>
-  <div class="shop-sub">Prodotti selezionati, Delivery in tutta la Lombardia</div>
+  <h1 class="shop-title">TRAPBOYS LOMBARDIA</h1>
+  <div class="shop-sub">Prodotti selezionati, spediti in giornata</div>
 </header>
 
 <main>
@@ -455,6 +483,9 @@ const QUANTITIES = ["20g", "50g", "100g", "500g", "1kg"];
           Carica i file .mp4 in una cartella "video" nello stesso repo GitHub
           accanto a index.html, e richiamali con un percorso relativo.
           Consiglio: clip da 5-10 secondi, sotto i 5-10MB, senza audio.
+   soldOut: (opzionale) metti "true" per segnare il prodotto come esaurito —
+            compare il badge "ESAURITO" e non è più ordinabile. Basta
+            rimettere "false" (o togliere la riga) quando torna disponibile.
    prices: ESATTAMENTE 5 valori, nello STESSO ORDINE di QUANTITIES
            (20g, 50g, 100g, 500g, 1kg). I primi 4 sono prezzi in EURO
            (numero, es. 45.00). L'ultimo (1kg) va lasciato come stringa
@@ -464,7 +495,7 @@ const QUANTITIES = ["20g", "50g", "100g", "500g", "1kg"];
    ============================================================ */
 
 // Username Telegram (senza @) da contattare per gli ordini BULK.
-const CONTACT_USERNAME = "tuo_username";
+const CONTACT_USERNAME = "TRAP26BOYS";
 
 // Username Telegram (senza @) che riceve il riepilogo ordine al checkout.
 const ORDER_RECIPIENT_USERNAME = "TRAP26BOYS";
@@ -473,31 +504,42 @@ const PRODUCTS = [
   {
     id: "p1", name: "•Dry Premium - MFL", desc: "Best Dry in circolazione, top Price", emoji: "🍫",
     prices: [170, 250, 400, 1550, 2850],
+	soldOut: true,   // ← questa riga
   },
   {
     id: "p2", name: "•Frozen - Hamdulla Farm ", desc: "Frozen 90u, vari Strain disponibili", emoji: "🍫",
-	video: "video/hamd.mp4", // esempio: rimuovi questa riga se non hai ancora caricato il file
+	video: "video/hamd.mov", // esempio: rimuovi questa riga se non hai ancora caricato il file
     prices: [220, 400, 700, 3100, "DM"],
   },
   {
     id: "p3", name: "•Plasma Static - Hamdulla Farm", desc: "Maroccan Plasma Static, top terps", emoji: "🍫",
     prices: [320, 650, 1200, "DM", "DM"],
+	soldOut: true,   // ← questa riga
   },
   {
     id: "p4", name: "•Piattella Skittlez - NOFARM", desc: "Piattella-like 73u", emoji: "🍫",
     prices: [200, 400, 750, "DM",  "DM"],
+	video: "video/piatte.mov",
   },
   {
     id: "p5", name: "•ICE-O-LATOR - NOFARM", desc: "Prodotto esclusivo, strain in DM", emoji: "🍫",
     prices: [470, 1000, "DM", "DM", "DM"],
+	soldOut: true,   // ← questa riga
   },
   {
     id: "p6", name: "•Cali Spain", desc: "Weed Spagnola, vari Strain disponibili", emoji: "🍃",
     prices: [220, 350, 650, 2600, "DM"],
+	img: "img/cali.jpg",
   },
   {
-    id: "p7", name: "•Frozen - Mountain Brothers Farm", desc: "Frozen placche da 50g, molti strain", emoji: "🍃",
+    id: "p7", name: "•Frozen - Mountain Brothers Farm", desc: "Frozen placche da 50g, molti strain", emoji: "🍫",
     prices: [200, 300, 600, 2400, "DM"],
+	video: "video/brode.mp4",
+  },
+  {
+    id: "p8", name: "•Amnesia - Weed", desc: "Weed Spagnola, Amnesia strain", emoji: "🍃",
+    prices: [160, 250, 450, 1650, "DM"],
+	video: "video/amensia.mov",
   },
 ];
 
@@ -562,6 +604,25 @@ const toastEl = document.getElementById("toast");
 
 function renderGrid() {
   grid.innerHTML = PRODUCTS.map(p => {
+    if (p.soldOut) {
+      const thumbContent = p.video
+        ? `<video src="${p.video}" autoplay muted loop playsinline></video>`
+        : p.emoji;
+      return `
+        <div class="card sold-out" data-id="${p.id}">
+          <div class="thumb">
+            <span class="sold-out-badge">ESAURITO</span>
+            ${thumbContent}
+          </div>
+          <div class="body">
+            <div class="name">${p.name}</div>
+            <div class="desc">${p.desc || ""}</div>
+            <div class="sold-out-note">Non disponibile al momento</div>
+          </div>
+        </div>
+      `;
+    }
+
     const vId = selectedVariant[p.id];
     const v = p.variants.find(x => x.id === vId);
     const key = lineKey(p.id, vId);
@@ -757,7 +818,7 @@ function buildOrderText() {
     return `• ${qty}x ${p.name} (${v.label}) — ${fmt(v.price * qty)}`;
   });
   const total = fmt(cartTotal());
-  return `🛍️ Nuovo ordine da Bottega Verde\n\n${lines.join("\n")}\n\nTotale: ${total}`;
+  return `🛍️ Nuovo ordine da TRAPBOYS BOT\n\n${lines.join("\n")}\n\nTotale: ${total}`;
 }
 
 function submitOrder() {
